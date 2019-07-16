@@ -36,7 +36,7 @@ func Save(path string) {
 	fmt.Println("File read successfully")
 	var ord []Order
 	json.Unmarshal(byteValue, &ord)
-	db, err := sql.Open("mysql", "root:Lead82_raz@tcp(127.0.0.1:3306)/log")
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/log")
 	if err != nil {
 		panic(err)
 	}
