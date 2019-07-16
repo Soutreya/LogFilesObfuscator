@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"sync"
 )
 
 type Order struct {
@@ -41,11 +42,17 @@ func Save(path string) {
 	}
 	fmt.Println("Database opened successfully")
 	defer db.Close()
+	var wg sync.WaitGroup
 	for i := 0; i < len(ord); i++ {
-		query := "INSERT INTO orders VALUES(" + strconv.Itoa(ord[i].FileID) + ", '" + ord[i].OrderID + "', '" + ord[i].Date + "', '" + ord[i].CustomerID + "', '" + ord[i].CustomerName + "', '" + ord[i].PizzaID + "', '" + ord[i].PizzaName + "', '" + ord[i].CardNum + "', " + strconv.Itoa(ord[i].Cost) + ")"
-		_, err := db.Query(query)
-		if err != nil {
-			panic(err)
-		}
+		wg.Add(1)
+		go func(data Order) {
+			query := "INSERT INTO orders VALUES(" + strconv.Itoa(data.FileID) + ", '" + data.OrderID + "', '" + data.Date + "', '" + data.CustomerID + "', '" + data.CustomerName + "', '" + data.PizzaID + "', '" + data.PizzaName + "', '" + data.CardNum + "', " + strconv.Itoa(data.Cost) + ")"
+			_, err := db.Query(query)
+			if err != nil {
+				panic(err)
+			}
+			wg.Done()
+		}(ord[i])
 	}
+	wg.Wait()
 }
